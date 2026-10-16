@@ -1,0 +1,44 @@
+{
+  "_source": "Shape of the admin/wireless?form=wlan answer in the tplinkrouterc6u tests; SSIDs and passwords are invented base64 values.",
+  "result": {
+    "band2_4": {
+      "backhaul": { "channel": 10 },
+      "guest": {
+        "password": "bm90LWEtcmVhbC1wYXNzd29yZA==",
+        "ssid": "SG9tZV9HdWVzdA==",
+        "vlan_id": 591,
+        "enable": false,
+        "need_set_vlan": false
+      },
+      "host": {
+        "password": "bm90LWEtcmVhbC1wYXNzd29yZA==",
+        "ssid": "SG9tZQ==",
+        "channel": 10,
+        "enable": true,
+        "mode": "11ng",
+        "channel_width": "HT40",
+        "enable_hide_ssid": false
+      }
+    },
+    "band5_1": {
+      "backhaul": { "channel": 44 },
+      "guest": {
+        "password": "bm90LWEtcmVhbC1wYXNzd29yZA==",
+        "ssid": "SG9tZV9HdWVzdA==",
+        "vlan_id": 591,
+        "enable": false,
+        "need_set_vlan": false
+      },
+      "host": {
+        "password": "bm90LWEtcmVhbC1wYXNzd29yZA==",
+        "ssid": "SG9tZQ==",
+        "channel": 44,
+        "enable": true,
+        "mode": "11ac",
+        "channel_width": "HT80",
+        "enable_hide_ssid": false
+      }
+    },
+    "is_eg": false
+  }
+}

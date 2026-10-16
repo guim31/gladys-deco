@@ -32,15 +32,25 @@ pushing.
 
 ```
 index.js                          SDK wiring only: handlers registered before connect()
-src/devices/index.js              registry of the device blueprints + dispatch helpers
-src/devices/<type>.js             one device type per file (buildDevice, onPoll, onSetValue...)
-src/scenes.js                     scene action handlers (manifest `scene_actions`)
-src/widgets.js                    dashboard widget handlers (manifest `widgets`)
+src/app.js                        the integration: own refresh timer, onPoll fallback, states, events, widget
 src/config.js                     DEFAULT_CONFIG (mirrors the manifest defaults) + normalization
-src/weather.js                    example driver (Open-Meteo)
-gladys-assistant-integration.json manifest: name, config_schema, actions, image...
-docs/en.md, docs/fr.md            user documentation, re-hosted by Gladys (mandatory)
-test/                             node --test, against the SDK's fake Gladys (integration-sdk/testing)
+src/devices.js                    Gladys devices: one per Deco, one presence sensor per client
+src/presence.js                   presence with the departure delay
+src/known-clients.js              MAC addresses already seen (/data/known-clients.json), for the trigger
+src/events.js                     scene triggers new_unknown_client, deco_offline
+src/commands.js                   guest Wi-Fi switch, restart of a Deco (both off by default)
+src/widgets.js                    the "mesh" dashboard widget
+src/issues.js                     repeated failures logged once, recovery once
+src/i18n.js                       every text, en/fr/de/es
+src/deco/client.js                Deco web API: one session per use (keys, login, requests, logout), queued
+src/deco/crypto.js                RSA (PKCS #1 v1.5, blocks) + AES-128-CBC + signature, node:crypto only
+src/deco/http.js                  node:http/https transport, self-signed accepted, https redirect
+src/deco/model.js                 raw answers -> Deco / NetworkClient / Snapshot
+scripts/probe.mjs                 read-only probe of a real Deco (orchestrator, with network)
+gladys-assistant-integration.json manifest: name, config_schema, actions, triggers, widget...
+docs/{en,fr,de,es}.md             user documentation, same sections (mandatory en + fr)
+test/helpers/fakeDeco.js          fake main Deco with the real encryption and the single session
+test/fixtures/deco/               anonymized answers (device_list, client_list, wlan)
 .github/scripts/release.mjs       release helpers (manifest bump, changelog), tested in test/
 ```
 
@@ -70,8 +80,9 @@ test/                             node --test, against the SDK's fake Gladys (in
   `type: "provider"`: 5.1.0). `test/manifest.test.js` ties the manifest to the
   code (defaults, action, scene and widget handlers): change both sides
   together.
-- **User-facing text** is bilingual (English and French): action messages,
-  manifest texts, and `docs/en.md` / `docs/fr.md`, kept in sync.
+- **User-facing text** exists in English, French, German and Spanish: action
+  messages, manifest texts, feature names, and `docs/{en,fr,de,es}.md`, kept in
+  sync (`test/i18n.test.js`).
 - **Style.** Prettier formats, ESLint catches mistakes. Comments explain why,
   in English. Tests never touch the network.
 
@@ -233,3 +244,36 @@ long, et sur un « Sie »/« Ihr… » de politesse en allemand. Le store exige 
 - Docs `en`, `fr`, `de`, `es` avec les mêmes sections.
 - Chauffe, ouverture, sécurité : ne rien rendre pilotable « comme un thermostat » ou par un assistant
   vocal quand une erreur serait dangereuse (leçon d'OctoPrint).
+
+## TP-Link Deco : l'API et ses pièges
+
+Protocole repris de `amosyuen/ha-tplink-deco` (MIT, `api.py`) ; la déconnexion, le Wi-Fi invité et le
+redémarrage lus dans `tplinkrouterc6u` (GPL-3.0 : lu pour le protocole, rien recopié).
+
+- **Connexion** : `POST /cgi-bin/luci/;stok=/login?form=keys` (clé RSA du mot de passe) puis
+  `form=auth` (clé RSA de signature + `seq`), sans session. Le mot de passe part chiffré RSA PKCS #1
+  v1.5, découpé en blocs de (octets du module − 11), hex concaténés. Les corps suivants sont
+  `sign=<rsa>&data=<urlencode(base64(aes))>` : AES-128-CBC dont la clé et l'IV sont des **nombres
+  décimaux de 16 chiffres** tirés par le client, signature `k=<clé>&i=<iv>&h=<md5("admin"+mot de
+passe)>&s=<seq + longueur de data avant encodage URL>`. La réponse donne `stok` (dans l'URL) et le
+  cookie `sysauth`. Utilisateur toujours `admin`, mot de passe du **propriétaire** de l'appli Deco.
+- **Une seule session d'administration** : une connexion ailleurs (page web du Deco) tue la nôtre, qui
+  reçoit alors un `data` vide → `ERROR_KINDS.SESSION`. D'où une session par lecture, fermée par
+  `admin/system?form=logout`, et une file d'attente : jamais deux sessions entrelacées.
+- **Mot de passe refusé** : erreur `-5002` avec `attemptsAllowed` ; le Deco bloque ensuite (403). La
+  lecture est **suspendue** jusqu'à un changement de configuration ou un test de connexion explicite.
+- Node 22 refuse `privateDecrypt` en PKCS #1 v1.5 (correctif Marvin) : le faux Deco déchiffre le RSA à
+  la main en BigInt. `publicEncrypt` côté client marche.
+- Les MAC arrivent en `aa:bb:…` ou `AA-BB-…` : identifiants normalisés en 12 hex minuscules, mais les
+  commandes (`client_list` par Deco, `reboot`) renvoient la MAC **telle que le Deco l'a écrite**.
+- Noms en base64 (`name`, `custom_nickname`), parfois en clair ou `<Error Decoding X>` ; `nickname` est
+  un préréglage (`living_room`). Débit de liaison : `backhual_speed` (sic) ou le max de
+  `rx_rate_list`/`tx_rate_list` (X50, firmware 1.8).
+- La réponse `admin/wireless?form=wlan` contient les **mots de passe Wi-Fi** (base64) : lue seulement
+  quand le pilotage du Wi-Fi invité est autorisé, jamais journalisée.
+- Certains firmwares redirigent http → https (307) : le client bascule une fois son adresse au lieu de
+  suivre la redirection (le cookie serait perdu). Certificat auto-signé accepté.
+- Les anciens firmwares « outer session » (Deco S7 : 401 sur `form=keys`) ne sont pas pris en charge.
+- Front de Gladys : le libellé générique remplace le nom d'une fonctionnalité quand aucune autre de
+  l'appareil n'a le même **type** (`front/src/utils/device.js`, comparaison sur le type seul). D'où
+  deux `input/binary` (en ligne, Internet), deux `integer` (clients, invités), deux `text`.
