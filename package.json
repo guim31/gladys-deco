@@ -1,6 +1,6 @@
 {
   "name": "gladys-deco",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "TP-Link Deco mesh Wi-Fi integration for Gladys Assistant: presence, Deco status, guest Wi-Fi, restarts.",
   "type": "module",

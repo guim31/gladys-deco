@@ -10,6 +10,8 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-10-16
+
 ### Added
 
 - TP-Link Deco mesh Wi-Fi, locally, through the web API of the main Deco (the password of the
@@ -28,4 +30,5 @@ the notes of the version's GitHub Release.
 - Names and messages in English, French, German and Spanish, and the documentation in the four
   languages.
 
-[Unreleased]: https://github.com/guim31/gladys-deco/commits/main
+[Unreleased]: https://github.com/guim31/gladys-deco/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/guim31/gladys-deco/releases/tag/v1.0.1
