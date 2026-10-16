@@ -1,101 +1,308 @@
 {
   "manifest_version": 1,
   "type": "device",
-  "name": "Demo Devices Template",
+  "name": "TP-Link Deco",
   "description": {
-    "en": "Starter template showing sensors, a switch, a dimmable light and a smart plug.",
-    "fr": "Template de démarrage : capteurs, interrupteur, lampe variable et prise connectée."
+    "en": "TP-Link Deco mesh Wi-Fi: who is home, Deco status, guest Wi-Fi and restarts.",
+    "fr": "Wi-Fi maillé TP-Link Deco : présence, état des Deco, Wi-Fi invité et redémarrage.",
+    "de": "TP-Link Deco Mesh-WLAN: Anwesenheit, Status der Decos, Gast-WLAN und Neustarts.",
+    "es": "Wi-Fi mallado TP-Link Deco: presencia, estado de los Deco, Wi-Fi de invitados y reinicios."
   },
   "version": "1.0.0",
-  "docker_image": "ghcr.io/gladysassistant/integration-template-js:1.0.0",
+  "docker_image": "ghcr.io/guim31/gladys-deco:1.0.0",
   "gladys_version": ">=5.1.0",
-  "cover_image": "https://raw.githubusercontent.com/GladysAssistant/integration-template-js/master/cover.png",
-  "categories": ["lighting", "security", "environment"],
-  "transports": ["local", "cloud"],
+  "cover_image": "https://raw.githubusercontent.com/guim31/gladys-deco/main/cover.png",
+  "categories": ["network"],
+  "transports": ["local"],
   "config_schema": [
     {
-      "key": "intro",
+      "key": "connection_section",
       "type": "section",
-      "label": { "en": "Getting started", "fr": "Pour commencer" },
-      "description": {
-        "en": "The demo weather station reads real data from the free Open-Meteo API: pick the coordinates to observe. No account, no API key.",
-        "fr": "La station météo de démonstration lit de vraies données via l'API gratuite Open-Meteo : choisissez les coordonnées à observer. Pas de compte, pas de clé d'API."
+      "label": {
+        "en": "Main Deco",
+        "fr": "Deco principal",
+        "de": "Haupt-Deco",
+        "es": "Deco principal"
       },
-      "links": [
+      "description": {
+        "en": "The Deco connected to your Internet box. Its local web API allows one administrator session at a time: the integration logs out after each read, and a login on the web page of the Deco interrupts the integration.",
+        "fr": "Le Deco relié à votre box Internet. Son API web locale n'accepte qu'une session d'administration à la fois : l'intégration se déconnecte après chaque lecture, et une connexion à la page web du Deco interrompt l'intégration.",
+        "de": "Das Deco, das mit deinem Internet-Router verbunden ist. Seine lokale Web-API erlaubt nur eine Admin-Sitzung zur selben Zeit: Die Integration meldet sich nach jedem Auslesen ab, und eine Anmeldung auf der Webseite des Deco unterbricht die Integration.",
+        "es": "El Deco conectado a su router de Internet. Su API web local solo admite una sesión de administración a la vez: la integración cierra la sesión tras cada lectura, y un inicio de sesión en la página web del Deco interrumpe la integración."
+      }
+    },
+    {
+      "key": "host",
+      "type": "string",
+      "label": {
+        "en": "Address of the main Deco",
+        "fr": "Adresse du Deco principal",
+        "de": "Adresse des Haupt-Deco",
+        "es": "Dirección del Deco principal"
+      },
+      "description": {
+        "en": "Its IP address on your network, shown in the Deco app (Network > the main Deco). Add https:// only if http does not answer.",
+        "fr": "Son adresse IP sur votre réseau, visible dans l'appli Deco (Réseau > le Deco principal). Ajoutez https:// seulement si http ne répond pas.",
+        "de": "Seine IP-Adresse in deinem Netzwerk, sichtbar in der Deco-App (Netzwerk > das Haupt-Deco). Füge https:// nur hinzu, wenn http nicht antwortet.",
+        "es": "Su dirección IP en la red, visible en la app Deco (Red > el Deco principal). Añada https:// solo si http no responde."
+      },
+      "placeholder": {
+        "en": "192.168.68.1",
+        "fr": "192.168.68.1",
+        "de": "192.168.68.1",
+        "es": "192.168.68.1"
+      },
+      "required": true
+    },
+    {
+      "key": "password",
+      "type": "secret",
+      "label": {
+        "en": "Deco app password",
+        "fr": "Mot de passe de l'appli Deco",
+        "de": "Passwort der Deco-App",
+        "es": "Contraseña de la app Deco"
+      },
+      "description": {
+        "en": "The password of the TP-Link ID that owns the network in the Deco app (the owner, not a manager). The Deco locks the login after several wrong passwords.",
+        "fr": "Le mot de passe de l'identifiant TP-Link propriétaire du réseau dans l'appli Deco (le propriétaire, pas un gestionnaire). Le Deco bloque la connexion après plusieurs mots de passe faux.",
+        "de": "Das Passwort der TP-Link-ID, der das Netzwerk in der Deco-App gehört (der Besitzer, kein Manager). Das Deco sperrt die Anmeldung nach mehreren falschen Passwörtern.",
+        "es": "La contraseña del ID de TP-Link propietario de la red en la app Deco (el propietario, no un administrador). El Deco bloquea el acceso tras varias contraseñas erróneas."
+      },
+      "required": true
+    },
+    {
+      "key": "presence_section",
+      "type": "section",
+      "label": {
+        "en": "Presence and refresh",
+        "fr": "Présence et rafraîchissement",
+        "de": "Anwesenheit und Aktualisierung",
+        "es": "Presencia y actualización"
+      },
+      "description": {
+        "en": "The clients online appear in the Discovery tab: add the phones to follow, each becomes a presence sensor.",
+        "fr": "Les clients en ligne apparaissent dans l'onglet Découverte : ajoutez les téléphones à suivre, chacun devient un capteur de présence.",
+        "de": "Die Clients, die online sind, erscheinen im Tab „Entdecken“: Füge die Handys hinzu, die du verfolgen willst, jedes wird ein Anwesenheitssensor.",
+        "es": "Los clientes en línea aparecen en la pestaña Descubrir: añada los teléfonos que desea seguir, cada uno se convierte en un sensor de presencia."
+      }
+    },
+    {
+      "key": "discover_clients",
+      "type": "boolean",
+      "label": {
+        "en": "Offer the network clients in Discovery",
+        "fr": "Proposer les clients du réseau dans la Découverte",
+        "de": "Netzwerk-Clients in „Entdecken“ anbieten",
+        "es": "Ofrecer los clientes de la red en Descubrir"
+      },
+      "required": false,
+      "default": true
+    },
+    {
+      "key": "away_delay",
+      "type": "number",
+      "label": {
+        "en": "Departure delay (minutes)",
+        "fr": "Délai de départ (minutes)",
+        "de": "Abwesenheitsverzögerung (Minuten)",
+        "es": "Retardo de salida (minutos)"
+      },
+      "description": {
+        "en": "How long a client must be gone before it is reported away (phones in sleep leave the Wi-Fi for a while).",
+        "fr": "Durée d'absence avant qu'un client soit déclaré parti (un téléphone en veille quitte le Wi-Fi un moment).",
+        "de": "Wie lange ein Client weg sein muss, bevor er als abwesend gilt (Handys im Standby verlassen das WLAN eine Weile).",
+        "es": "Tiempo de ausencia antes de que un cliente se considere fuera (un teléfono en reposo deja el Wi-Fi un rato)."
+      },
+      "required": false,
+      "default": 5,
+      "min": 0,
+      "max": 120
+    },
+    {
+      "key": "poll_interval",
+      "type": "select",
+      "label": {
+        "en": "Refresh interval",
+        "fr": "Intervalle de rafraîchissement",
+        "de": "Aktualisierungsintervall",
+        "es": "Intervalo de actualización"
+      },
+      "description": {
+        "en": "Each read is one login on the Deco. Every 30 seconds suits a fast presence; every 2 or 5 minutes spares the Deco.",
+        "fr": "Chaque lecture est une connexion au Deco. Toutes les 30 secondes pour une présence rapide ; toutes les 2 ou 5 minutes pour ménager le Deco.",
+        "de": "Jedes Auslesen ist eine Anmeldung am Deco. Alle 30 Sekunden für eine schnelle Anwesenheit; alle 2 oder 5 Minuten schont das Deco.",
+        "es": "Cada lectura es un inicio de sesión en el Deco. Cada 30 segundos para una presencia rápida; cada 2 o 5 minutos para no cargar el Deco."
+      },
+      "required": false,
+      "default": "60",
+      "options": [
         {
-          "url": "https://open-meteo.com/en/docs",
-          "label": { "en": "Open-Meteo documentation", "fr": "Documentation Open-Meteo" }
+          "value": "30",
+          "label": {
+            "en": "30 seconds",
+            "fr": "30 secondes",
+            "de": "30 Sekunden",
+            "es": "30 segundos"
+          }
+        },
+        {
+          "value": "60",
+          "label": {
+            "en": "1 minute",
+            "fr": "1 minute",
+            "de": "1 Minute",
+            "es": "1 minuto"
+          }
+        },
+        {
+          "value": "120",
+          "label": {
+            "en": "2 minutes",
+            "fr": "2 minutes",
+            "de": "2 Minuten",
+            "es": "2 minutos"
+          }
+        },
+        {
+          "value": "300",
+          "label": {
+            "en": "5 minutes",
+            "fr": "5 minutes",
+            "de": "5 Minuten",
+            "es": "5 minutos"
+          }
         }
       ]
     },
     {
-      "key": "latitude",
-      "type": "number",
-      "label": { "en": "Latitude", "fr": "Latitude" },
-      "description": {
-        "en": "Latitude used for the demo weather sensor.",
-        "fr": "Latitude utilisée par le capteur météo de démonstration."
+      "key": "commands_section",
+      "type": "section",
+      "label": {
+        "en": "Commands (off by default)",
+        "fr": "Commandes (désactivées par défaut)",
+        "de": "Befehle (standardmäßig aus)",
+        "es": "Comandos (desactivados por defecto)"
       },
-      "placeholder": { "en": "e.g. 48.8566", "fr": "ex. 48.8566" },
-      "required": true,
-      "default": 48.8566,
-      "min": -90,
-      "max": 90
+      "description": {
+        "en": "Restarting a Deco cuts the Wi-Fi of its area for a few minutes, the main Deco the whole network: turn on only what your scenes need. The guest Wi-Fi switch appears on the main Deco once allowed (Discovery > Update).",
+        "fr": "Redémarrer un Deco coupe le Wi-Fi de sa zone quelques minutes, le Deco principal tout le réseau : n'activez que ce dont vos scènes ont besoin. L'interrupteur du Wi-Fi invité apparaît sur le Deco principal une fois autorisé (Découverte > Mettre à jour).",
+        "de": "Ein Neustart schaltet das WLAN seines Bereichs für ein paar Minuten ab, beim Haupt-Deco das ganze Netzwerk: Aktiviere nur, was deine Szenen brauchen. Der Schalter des Gast-WLANs erscheint am Haupt-Deco, sobald erlaubt (Entdecken > Aktualisieren).",
+        "es": "Reiniciar un Deco corta el Wi-Fi de su zona unos minutos, el Deco principal toda la red: active solo lo que necesiten sus escenas. El interruptor del Wi-Fi de invitados aparece en el Deco principal una vez permitido (Descubrir > Actualizar)."
+      }
     },
     {
-      "key": "longitude",
-      "type": "number",
-      "label": { "en": "Longitude", "fr": "Longitude" },
-      "description": {
-        "en": "Longitude used for the demo weather sensor.",
-        "fr": "Longitude utilisée par le capteur météo de démonstration."
+      "key": "allow_guest_wifi",
+      "type": "boolean",
+      "label": {
+        "en": "Allow guest Wi-Fi control",
+        "fr": "Autoriser le pilotage du Wi-Fi invité",
+        "de": "Steuerung des Gast-WLANs erlauben",
+        "es": "Permitir el control del Wi-Fi de invitados"
       },
-      "placeholder": { "en": "e.g. 2.3522", "fr": "ex. 2.3522" },
-      "required": true,
-      "default": 2.3522,
-      "min": -180,
-      "max": 180
+      "required": false,
+      "default": false
     },
     {
-      "key": "unit",
+      "key": "allow_reboot",
+      "type": "boolean",
+      "label": {
+        "en": "Allow restarts",
+        "fr": "Autoriser les redémarrages",
+        "de": "Neustarts erlauben",
+        "es": "Permitir los reinicios"
+      },
+      "required": false,
+      "default": false
+    },
+    {
+      "key": "language",
       "type": "select",
-      "label": { "en": "Temperature unit", "fr": "Unité de température" },
-      "required": false,
-      "default": "celsius",
-      "options": [
-        { "value": "celsius", "label": { "en": "Celsius", "fr": "Celsius" } },
-        { "value": "fahrenheit", "label": { "en": "Fahrenheit", "fr": "Fahrenheit" } }
-      ]
-    },
-    {
-      "key": "poll_frequency",
-      "type": "number",
-      "label": { "en": "Refresh interval (s)", "fr": "Intervalle de rafraîchissement (s)" },
+      "label": {
+        "en": "Language of the feature names",
+        "fr": "Langue des noms de fonctionnalités",
+        "de": "Sprache der Funktionsnamen",
+        "es": "Idioma de los nombres de las funciones"
+      },
       "description": {
-        "en": "How often sensors are polled, in seconds (one minute minimum).",
-        "fr": "Fréquence d'interrogation des capteurs, en secondes (une minute minimum)."
+        "en": "Also used for the messages of the integration. Names are set when a device is added.",
+        "fr": "Sert aussi aux messages de l'intégration. Les noms sont fixés à l'ajout d'un appareil.",
+        "de": "Gilt auch für die Meldungen der Integration. Die Namen werden beim Hinzufügen eines Geräts festgelegt.",
+        "es": "También se usa para los mensajes de la integración. Los nombres se fijan al añadir un dispositivo."
       },
       "required": false,
-      "default": 300,
-      "min": 60,
-      "max": 3600
+      "default": "fr",
+      "options": [
+        {
+          "value": "en",
+          "label": {
+            "en": "English",
+            "fr": "Anglais",
+            "de": "Englisch",
+            "es": "Inglés"
+          }
+        },
+        {
+          "value": "fr",
+          "label": {
+            "en": "French",
+            "fr": "Français",
+            "de": "Französisch",
+            "es": "Francés"
+          }
+        },
+        {
+          "value": "de",
+          "label": {
+            "en": "German",
+            "fr": "Allemand",
+            "de": "Deutsch",
+            "es": "Alemán"
+          }
+        },
+        {
+          "value": "es",
+          "label": {
+            "en": "Spanish",
+            "fr": "Espagnol",
+            "de": "Spanisch",
+            "es": "Español"
+          }
+        }
+      ]
     }
   ],
   "actions": [
     {
-      "key": "test_weather",
-      "label": { "en": "Test the weather provider", "fr": "Tester le fournisseur météo" },
-      "timeout_seconds": 30
+      "key": "test_connection",
+      "label": {
+        "en": "Test the connection",
+        "fr": "Tester la connexion",
+        "de": "Verbindung testen",
+        "es": "Probar la conexión"
+      },
+      "timeout_seconds": 60
     },
     {
-      "key": "identify",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
+      "key": "reboot_deco",
+      "label": {
+        "en": "Restart a Deco",
+        "fr": "Redémarrer un Deco",
+        "de": "Ein Deco neu starten",
+        "es": "Reiniciar un Deco"
+      },
+      "timeout_seconds": 60,
       "fields": [
         {
           "key": "device",
           "type": "select",
           "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
+          "label": {
+            "en": "Deco",
+            "fr": "Deco",
+            "de": "Deco",
+            "es": "Deco"
+          },
           "required": true
         }
       ]
@@ -103,75 +310,243 @@
   ],
   "scene_triggers": [
     {
-      "key": "motion_detected",
-      "label": { "en": "Motion detected", "fr": "Mouvement détecté" },
+      "key": "new_unknown_client",
+      "label": {
+        "en": "Unknown device connected",
+        "fr": "Appareil inconnu connecté",
+        "de": "Unbekanntes Gerät verbunden",
+        "es": "Dispositivo desconocido conectado"
+      },
       "description": {
-        "en": "A demo motion sensor saw a person or an animal move.",
-        "fr": "Un détecteur de démonstration a vu bouger une personne ou un animal."
+        "en": "A device never seen on the Deco network joins it.",
+        "fr": "Un appareil jamais vu sur le réseau Deco le rejoint.",
+        "de": "Ein Gerät, das noch nie im Deco-Netzwerk war, tritt ihm bei.",
+        "es": "Un dispositivo nunca visto en la red Deco se une a ella."
+      },
+      "fields": [
+        {
+          "key": "connection",
+          "type": "select",
+          "label": {
+            "en": "Connection",
+            "fr": "Connexion",
+            "de": "Verbindung",
+            "es": "Conexión"
+          },
+          "options": [
+            {
+              "value": "wireless",
+              "label": {
+                "en": "Wi-Fi",
+                "fr": "Wi-Fi",
+                "de": "WLAN",
+                "es": "Wi-Fi"
+              }
+            },
+            {
+              "value": "wired",
+              "label": {
+                "en": "Wired",
+                "fr": "Filaire",
+                "de": "Kabel",
+                "es": "Por cable"
+              }
+            }
+          ]
+        },
+        {
+          "key": "guest",
+          "type": "select",
+          "label": {
+            "en": "Guest network",
+            "fr": "Réseau invité",
+            "de": "Gastnetzwerk",
+            "es": "Red de invitados"
+          },
+          "options": [
+            {
+              "value": "yes",
+              "label": {
+                "en": "Yes",
+                "fr": "Oui",
+                "de": "Ja",
+                "es": "Sí"
+              }
+            },
+            {
+              "value": "no",
+              "label": {
+                "en": "No",
+                "fr": "Non",
+                "de": "Nein",
+                "es": "No"
+              }
+            }
+          ]
+        }
+      ],
+      "variables": [
+        {
+          "key": "name",
+          "type": "string",
+          "label": {
+            "en": "Name",
+            "fr": "Nom",
+            "de": "Name",
+            "es": "Nombre"
+          }
+        },
+        {
+          "key": "mac",
+          "type": "string",
+          "label": {
+            "en": "MAC address",
+            "fr": "Adresse MAC",
+            "de": "MAC-Adresse",
+            "es": "Dirección MAC"
+          }
+        },
+        {
+          "key": "ip",
+          "type": "string",
+          "label": {
+            "en": "IP address",
+            "fr": "Adresse IP",
+            "de": "IP-Adresse",
+            "es": "Dirección IP"
+          }
+        },
+        {
+          "key": "connection",
+          "type": "string",
+          "label": {
+            "en": "Connection",
+            "fr": "Connexion",
+            "de": "Verbindung",
+            "es": "Conexión"
+          }
+        },
+        {
+          "key": "band",
+          "type": "string",
+          "label": {
+            "en": "Wi-Fi band",
+            "fr": "Bande Wi-Fi",
+            "de": "WLAN-Band",
+            "es": "Banda Wi-Fi"
+          }
+        },
+        {
+          "key": "deco_name",
+          "type": "string",
+          "label": {
+            "en": "Connected to",
+            "fr": "Connecté à",
+            "de": "Verbunden mit",
+            "es": "Conectado a"
+          }
+        }
+      ]
+    },
+    {
+      "key": "deco_offline",
+      "label": {
+        "en": "Deco offline",
+        "fr": "Deco hors ligne",
+        "de": "Deco offline",
+        "es": "Deco fuera de línea"
+      },
+      "description": {
+        "en": "A Deco of the mesh drops out: unplugged, out of reach, or restarting.",
+        "fr": "Un Deco du réseau maillé décroche : débranché, hors de portée ou en redémarrage.",
+        "de": "Ein Deco des Mesh-Netzwerks fällt aus: ausgesteckt, außer Reichweite oder beim Neustart.",
+        "es": "Un Deco de la red mallada se desconecta: desenchufado, fuera de alcance o reiniciándose."
       },
       "fields": [
         {
           "key": "device",
           "type": "select",
           "source": "devices",
-          "label": { "en": "Sensor", "fr": "Détecteur" }
-        },
-        {
-          "key": "target",
-          "type": "multi_select",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" },
-          "options": [
-            { "value": "person", "label": { "en": "Person", "fr": "Personne" } },
-            { "value": "animal", "label": { "en": "Animal", "fr": "Animal" } }
-          ]
+          "label": {
+            "en": "Deco",
+            "fr": "Deco",
+            "de": "Deco",
+            "es": "Deco"
+          }
         }
       ],
       "variables": [
         {
-          "key": "target",
+          "key": "device_name",
           "type": "string",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" }
+          "label": {
+            "en": "Deco name",
+            "fr": "Nom du Deco",
+            "de": "Name des Deco",
+            "es": "Nombre del Deco"
+          }
+        },
+        {
+          "key": "model",
+          "type": "string",
+          "label": {
+            "en": "Model",
+            "fr": "Modèle",
+            "de": "Modell",
+            "es": "Modelo"
+          }
         }
       ]
     }
   ],
   "scene_actions": [
     {
-      "key": "identify_device",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
-      "description": {
-        "en": "Make a device signal itself (the demo light blinks).",
-        "fr": "Fait se signaler un appareil (la lampe de démonstration clignote)."
+      "key": "reboot_deco",
+      "label": {
+        "en": "Restart a Deco",
+        "fr": "Redémarrer un Deco",
+        "de": "Ein Deco neu starten",
+        "es": "Reiniciar un Deco"
       },
-      "timeout_seconds": 15,
+      "description": {
+        "en": "Restart one Deco (needs \"Allow restarts\"): its area loses the Wi-Fi for a few minutes.",
+        "fr": "Redémarre un Deco (« Autoriser les redémarrages » requis) : sa zone perd le Wi-Fi quelques minutes.",
+        "de": "Startet ein Deco neu („Neustarts erlauben“ nötig): Sein Bereich verliert das WLAN für ein paar Minuten.",
+        "es": "Reinicia un Deco (requiere «Permitir los reinicios»): su zona pierde el Wi-Fi unos minutos."
+      },
+      "timeout_seconds": 60,
       "fields": [
         {
           "key": "device",
           "type": "select",
           "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
+          "label": {
+            "en": "Deco",
+            "fr": "Deco",
+            "de": "Deco",
+            "es": "Deco"
+          },
           "required": true
-        }
-      ],
-      "outputs": [
-        {
-          "key": "signalled",
-          "type": "boolean",
-          "label": { "en": "Device signalled", "fr": "Appareil signalé" }
         }
       ]
     }
   ],
   "widgets": [
     {
-      "key": "demo_status",
-      "label": { "en": "Demo status", "fr": "État de la démo" },
-      "description": {
-        "en": "Live temperature and plug power, plug connection and observed location.",
-        "fr": "Température et puissance en direct, connexion de la prise, position observée."
+      "key": "mesh",
+      "label": {
+        "en": "Deco network",
+        "fr": "Réseau Deco",
+        "de": "Deco-Netzwerk",
+        "es": "Red Deco"
       },
-      "icon": "activity",
-      "action_timeout_seconds": 15
+      "description": {
+        "en": "Clients online, guests, the state of each Deco and who is home.",
+        "fr": "Clients en ligne, invités, l'état de chaque Deco et qui est à la maison.",
+        "de": "Clients online, Gäste, der Zustand jedes Deco und wer zu Hause ist.",
+        "es": "Clientes en línea, invitados, el estado de cada Deco y quién está en casa."
+      },
+      "icon": "wifi"
     }
   ]
 }

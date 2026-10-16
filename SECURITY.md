@@ -30,6 +30,19 @@ Gladys before reporting a problem.
 
 In scope: the code of this repository and the Docker image it publishes.
 
+What the integration handles:
+
+- **Secret**: the password of the owner TP-Link ID of the Deco app, stored by Gladys in the
+  integration configuration. It is only sent to the main Deco, RSA-encrypted as the Deco web page does
+  it, and never written to the logs nor to `/data`.
+- **Session**: the session token and cookie of the Deco live in memory for one read and are closed by
+  a logout right after; they are never logged.
+- **`/data`**: `known-clients.json`, the MAC addresses already seen on the mesh (no name, no address),
+  for the "unknown device connected" trigger.
+- **Network**: HTTP or HTTPS to the address of the main Deco only, on the local network. The Deco's
+  self-signed certificate is accepted (it cannot be verified); the payloads are encrypted by the Deco
+  protocol itself. No cloud service is contacted.
+
 Out of scope: Gladys Assistant itself (see its
-[security policy](https://github.com/GladysAssistant/Gladys/security/policy)),
-and the third-party services and devices the integration talks to.
+[security policy](https://github.com/GladysAssistant/Gladys/security/policy)), the Deco firmware and
+the TP-Link services.
